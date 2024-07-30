@@ -1,0 +1,152 @@
+<!-- <router-outlet></router-outlet> -->
+
+<div class="container-fluid cf-100">
+
+  <div class="container c-100">
+
+    <div class="box-info-rede-off" *ngIf="status == 'Offline'">
+      <div class="container box-fix-rede-off">
+        <div class="info-rede-off">
+          <span class="reset-font" style="color: #fff;text-align: center;">Você está Offline, verifique sua conexção de rede.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box-info-rede-on" *ngIf="status == 'Online' && fixStatus != 1">
+      <div class="container box-fix-rede-on">
+        <div class="info-rede-on">
+          <span class="reset-font" style="color: #fff;text-align: center;">Você está Online.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box-file">
+      <div class="mb-3 w-100">
+        <label class="form-label fl-box-file">
+          Verificar URL's (.excel)
+          <span>
+            <a class="a-box-file" href="../assets/modelo/modelo.xlsx" target="_blank">
+              Download Modelo
+            </a>
+          </span>
+        </label>
+        <input class="form-control form-control-sm fc-box-file" id="formFileSm" type="file" name="importXlsx" (change)="incomingfile($event)" placeholder="Upload file" accept=".xlsx">
+      </div>
+
+      <div class="info-box-file">
+        <button class="btn btn-primary btn-sm btn-box-file" (click)="ImportXlsx2()" *ngIf="file" [disabled]="startBtn">
+          Check Url's
+          <div class="spinner-border spinner-border-sm" style="margin-left: 10px;width: 10px;height: 10px;" *ngIf="startBtn"></div>
+        </button>
+        <div class="progress-box-info" *ngIf="start && file">
+          <div class="w-100">
+            <mat-progress-bar mode="determinate" value="{{total}}"></mat-progress-bar>
+          </div>
+          <div>
+            <span>Aguarde, verificando... {{result.length}} de {{totalizador}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box-result" *ngIf="result.length > 0">
+      <div class="title-box-result">
+        <h5 class="p-0 m-0">Result</h5>
+        <small class="info-box-result">
+          <span>
+            Sucesso: {{sucesso}}
+          </span>
+          <span>
+            Falha: {{falha}}
+          </span>
+          <span>
+            Erro: {{erro}}
+          </span>
+          <span>
+            <button class="btn btn-primary btn-sm btn-box-file" [disabled]="startBtn" (click)="exportexcel()">
+              Export
+              <div class="spinner-border spinner-border-sm" style="margin-left: 10px;width: 10px;height: 10px;" *ngIf="startBtn"></div>
+            </button>
+          </span>
+        </small>
+      </div>
+
+      <div *ngIf="result.length > 0">
+        <input class="search-box-result" type="text" [(ngModel)]="pesquisa" (keydown)="filtroRetornoTS()" (keyup)="filtroRetornoTS()" (keypress)="filtroRetornoTS()" placeholder="Serach"/>
+      </div>
+
+
+      <div class="table-responsive" *ngIf="result.length > 0">
+        <table class="table table-dark table-hover table-sm" matSort (matSortChange)="sortData($event)">
+          <thead>
+            <tr>
+              <th mat-sort-header="id" class="align-middle reset-font" >#</th>
+              <th mat-sort-header="status" class="align-middle reset-font">Status</th>
+              <th mat-sort-header="statusText" class="align-middle reset-font">Status Text</th>
+              <th mat-sort-header="type" class="align-middle reset-font">Type</th>
+              <th mat-sort-header="url" class="align-middle reset-font">URL</th>
+              <th mat-sort-header="size" class="align-middle reset-font">Size</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let res of result | filtroRetorno: pesquisa | paginate: { itemsPerPage: contador, currentPage: pag } ">
+              <td class="align-middle reset-font" >
+                <span>{{res.id}}</span>
+              </td>
+              <td class="align-middle reset-font" >
+                <span [ngStyle]="{'color':res.status == 200 ? '#7fdb9c' : '#db6666'}">{{res.status}}</span>
+              </td>
+              <td class="align-middle reset-font" >
+                <span>{{res.statusText}}</span>
+              </td>
+              <td class="align-middle reset-font" >
+                <span>{{res.type}}</span>
+              </td>
+              <td class="align-middle reset-font" >
+                <span>
+                  <a href="{{res.url}}" target="_blank" style=" text-decoration: none; " [ngStyle]="{'color':res.status == 200 ? '#7fdb9c' : '#db6666'}">{{res.url}}</a>
+                </span>
+              </td>
+              <td class="align-middle reset-font" >
+                <span>{{res.size}}</span>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+
+      <div class="text-right row pagination-box-result" *ngIf="result.length > 0">
+
+        <div class="col-lg-1 col-md-2 col-sm-6 col-6">
+            <select class="form-select form-select-sm select-box-result" (change)="pags($event.target)">
+              <option value="5" selected>5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+        </div>
+        <div class="col-lg-5 col-md-4 col-sm-6 col-6 pagination-info-box-result">
+          <span> Total {{result.length}} </span> <span> Filtro {{pesquisaLength}}</span>
+        </div>
+        <div class="col-lg-6 col-md-5 col-sm-12 col-12 info-pagination-box-result">
+            <pagination-controls (pageChange)="handlePageChange($event)" previousLabel="Anterior" nextLabel="Próximo"></pagination-controls>
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="footer-info">
+      <a href="https://github.com/DevHonorato" target="_blank" class="a-footer-info">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="navbar-nav-svg" viewBox="0 0 512 499.36" role="img">
+          <title>GitHub</title>
+          <path fill="currentColor" fill-rule="evenodd" d="M256 0C114.64 0 0 114.61 0 256c0 113.09 73.34 209 175.08 242.9 12.8 2.35 17.47-5.56 17.47-12.34 0-6.08-.22-22.18-.35-43.54-71.2 15.49-86.2-34.34-86.2-34.34-11.64-29.57-28.42-37.45-28.42-37.45-23.27-15.84 1.73-15.55 1.73-15.55 25.69 1.81 39.21 26.38 39.21 26.38 22.84 39.12 59.92 27.82 74.5 21.27 2.33-16.54 8.94-27.82 16.25-34.22-56.84-6.43-116.6-28.43-116.6-126.49 0-27.95 10-50.8 26.35-68.69-2.63-6.48-11.42-32.5 2.51-67.75 0 0 21.49-6.88 70.4 26.24a242.65 242.65 0 0 1 128.18 0c48.87-33.13 70.33-26.24 70.33-26.24 14 35.25 5.18 61.27 2.55 67.75 16.41 17.9 26.31 40.75 26.31 68.69 0 98.35-59.85 120-116.88 126.32 9.19 7.9 17.38 23.53 17.38 47.41 0 34.22-.31 61.83-.31 70.23 0 6.85 4.61 14.81 17.6 12.31C438.72 464.97 512 369.08 512 256.02 512 114.62 397.37 0 256 0z"></path>
+        </svg>
+        DevHonorato
+      </a>
+    </div>
+
+  </div>
+</div>
